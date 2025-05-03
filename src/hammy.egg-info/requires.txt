@@ -1,0 +1,9 @@
+beautifulsoup4
+msgspec
+pillow
+platformdirs
+pyperclip
+requests
+rich
+tomlkit
+urllib3
