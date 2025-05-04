@@ -18,8 +18,6 @@
 
 -For direct links just omit any format switches, if a folder is specified, all image files will be uploaded recursively.
 
--An example with 4 items
-
 ## **Install:**
 
 ``pip install git+https://github.com/MrArgparse/hammy.git``
@@ -29,6 +27,8 @@
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
 ## **Usage instructions:**
+
+An example with 4 items
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 
