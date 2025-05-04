@@ -7,11 +7,11 @@ requires-python = ">=3.10"
 keywords = ["images", "upload", "hamster"]
 
 authors = [
-  {name = "MrArgParse", email = "-@-.org" }
+  {name = "MrArgparse", email = "-@-.org" }
 ]
 
 maintainers = [
-  {name = "MrArgParse", email = "-@-.org" }
+  {name = "MrArgparse", email = "-@-.org" }
 ]
 
 classifiers = [

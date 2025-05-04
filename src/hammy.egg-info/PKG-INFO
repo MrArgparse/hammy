@@ -1,10 +1,10 @@
 Metadata-Version: 2.4
 Name: hammy
 Version: 0.0.1
-Summary: Upload images to fapping
-Author-email: brokedarius <-@-.org>
-Maintainer-email: brokedarius <-@-.org>
-Keywords: images,upload,fapping
+Summary: Upload images to hamster
+Author-email: MrArgparse <-@-.org>
+Maintainer-email: MrArgparse <-@-.org>
+Keywords: images,upload,hamster
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Software Development :: Build Tools
@@ -15,7 +15,6 @@ Classifier: Programming Language :: Python :: 3.11
 Classifier: Programming Language :: Python :: 3 :: Only
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown
-Requires-Dist: beautifulsoup4
 Requires-Dist: msgspec
 Requires-Dist: pillow
 Requires-Dist: platformdirs
@@ -26,7 +25,7 @@ Requires-Dist: tomlkit
 Requires-Dist: urllib3
 Requires-Dist: pyperclip
 
-Features:
+## **Features:**
 
 -Sends links to clipboard
 
@@ -46,9 +45,7 @@ Features:
 
 -For direct links just omit any format switches, if a folder is specified, all image files will be uploaded recursively.
 
--An example with 4 items
-
-Install:
+## **Install:**
 
 ``pip install git+https://github.com/MrArgparse/hammy.git``
 
@@ -56,6 +53,9 @@ Install:
 
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
+## **Usage instructions:**
+
+An example with 4 items
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 
