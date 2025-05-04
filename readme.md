@@ -1,4 +1,4 @@
-[bold underline]Features:[/underline bold]
+**Features:**
 
 -Sends links to clipboard
 
@@ -20,7 +20,7 @@
 
 -An example with 4 items
 
-[bold underline]Install:[/underline bold]
+**Install:**
 
 ``pip install git+https://github.com/MrArgparse/hammy.git``
 
@@ -28,7 +28,7 @@
 
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
-[bold underline]Usage instructions[/underline bold]
+**Usage instructions**
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 
