@@ -1,17 +1,17 @@
 [project]
 name = "hammy"
 version = "0.0.1"
-description = "Upload images to fapping"
+description = "Upload images to hamster"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["images", "upload", "fapping"]
+keywords = ["images", "upload", "hamster"]
 
 authors = [
-  {name = "brokedarius", email = "-@-.org" }
+  {name = "MrArgParse", email = "-@-.org" }
 ]
 
 maintainers = [
-  {name = "brokedarius", email = "-@-.org" }
+  {name = "MrArgParse", email = "-@-.org" }
 ]
 
 classifiers = [
