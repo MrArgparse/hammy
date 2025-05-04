@@ -14,11 +14,20 @@ Features:
 
 -Can format into imgnm as well which is not available on the site
 
--May add certain options later like the NSFW switch, album_id, category_id and expiration
+-May add certain options later like the NSFW switch (is it of any use?), album_id, category_id and expiration
 
--For direct links just omit any format switches, if a folder is specified, all image files under size limit will be uploaded recursively.
+-For direct links just omit any format switches, if a folder is specified, all image files will be uploaded recursively.
 
 -An example with 4 items
+
+Install:
+
+``pip install git+https://github.com/MrArgparse/hammy.git``
+
+-Run the tool for the first time by entering ``hammy`` in the terminal
+
+-Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
+
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 

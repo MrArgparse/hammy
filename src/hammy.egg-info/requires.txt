@@ -7,3 +7,4 @@ requests
 rich
 tomlkit
 urllib3
+pyperclip

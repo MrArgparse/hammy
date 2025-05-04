@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 from PIL import Image
-from rich.console import Group
-from rich import print as rprint
+from rich.console import Console, Group
 from rich.live import Live
 from rich.logging import RichHandler
 from rich.progress import Progress, BarColumn, MofNCompleteColumn, TextColumn
@@ -194,7 +193,7 @@ def upload_image(image_path: Path, width: int | None = None) -> tuple[str, str]:
 	http = create_retry()
 
 	if width:
-		headers['width'] = width
+		headers['width'] = str(width)
 
 	fspath = str(image_path)
 
@@ -280,40 +279,44 @@ def main() -> list[str] | str | None:
 	parser = parse_fappy()
 	args = parser.parse_args(sys.argv[1:])
 	urls, files_or_dirs = separate_sources(args.source)
-	downloads = []
-	total = len(urls)
 
-	if sys.stdout.isatty():
-		description_progress0, progress_bar0 = get_progress('Downloading')
-		group0 = Group(description_progress0, progress_bar0)
+	if files_or_dirs:
+		pics = organize_pics(files_or_dirs)
 
-	else:
-		group0 = None
+	if urls:
+		downloads = []
+		total = len(urls)
 
-	with Live(group0):
+		if sys.stdout.isatty():
+			description_progress0, progress_bar0 = get_progress('Downloading')
+			group0 = Group(description_progress0, progress_bar0)
 
-		if group0:
-			task0= progress_bar0.add_task('Task 0', total=total)
-			task1 = description_progress0.add_task('Task 1', total=total, extra=urls[0])
+		else:
+			group0 = None
 
-		for u in urls:
-			
-			try:
-				dl = download_image(u)
-
-			except (ValueError, requests.exceptions.HTTPError) as e:
-				logging.error(f'{type(e).__name__}: {e}')
-
-				continue
-
-			downloads.append(dl)
+		with Live(group0):
 
 			if group0:
-				progress_bar0.update(task0, advance=1, refresh=True)
-				description_progress0.update(task1, advance=1, refresh=True, extra=u)
+				task0= progress_bar0.add_task('Task 0', total=total)
+				task1 = description_progress0.add_task('Task 1', total=total, extra=urls[0])
 
-	pics = organize_pics(files_or_dirs)
-	pics.extend(downloads)
+			for u in urls:
+			
+				try:
+					dl = download_image(u)
+
+				except (ValueError, requests.exceptions.HTTPError) as e:
+					logging.error(f'{type(e).__name__}: {e}')
+
+					continue
+
+				downloads.append(dl)
+
+				if group0:
+					progress_bar0.update(task0, advance=1, refresh=True)
+					description_progress0.update(task1, advance=1, refresh=True, extra=u)
+
+		pics.extend(downloads)
 
 	if not pics:
 		logging.error(f'No compatible arguments.')
@@ -368,7 +371,8 @@ def main() -> list[str] | str | None:
 		path_name = get_out(txt_path)
 		save_txt(path_name, text_string)
 
-	rprint(text_string)
+	console = Console()
+	console.print(text_string, markup=False)
 
 if __name__  ==  '__main__':
 	main()
