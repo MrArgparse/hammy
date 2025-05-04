@@ -30,7 +30,6 @@ classifiers = [
 ]
 
 dependencies = [
-  "beautifulsoup4",
   "msgspec",
   "pillow",
   "platformdirs",

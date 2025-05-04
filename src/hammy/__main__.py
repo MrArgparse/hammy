@@ -6,6 +6,7 @@ from rich.live import Live
 from rich.logging import RichHandler
 from rich.progress import Progress, BarColumn, MofNCompleteColumn, TextColumn
 from requests.adapters import HTTPAdapter
+from typing import Type
 from urllib3.util.retry import Retry
 from urllib.parse import urlparse, urlunparse
 import argparse
@@ -42,7 +43,7 @@ def parse_fappy() -> argparse.ArgumentParser:
 
 	return parser
 
-def encode_hook(obj: Path | str):
+def encode_hook(obj: Path | str) -> str:
 
 	if isinstance(obj, Path):
 
@@ -50,7 +51,7 @@ def encode_hook(obj: Path | str):
 
 	return obj  
 
-def decode_hook(type_: Path | str, value):
+def decode_hook(type_: Type[Path], value: Path | str) -> Path | str:
 
 	if type_ is Path and isinstance(value, str):
 
@@ -258,7 +259,7 @@ def format_links(link_format: list[str], link: str, image_id: str) -> str:
 
 	return result
 
-def change_url_suffix(url, new_suffix):
+def change_url_suffix(url: str, new_suffix: str) -> str:
 	parts = urlparse(url)
 	path = PurePosixPath(parts.path)
 	new_path = path.with_suffix(f'{new_suffix}{path.suffix}')
@@ -268,14 +269,16 @@ def change_url_suffix(url, new_suffix):
 
 def is_url(s: str) -> bool:
 	parsed = urlparse(s)
+
 	return parsed.scheme in ("http", "https") and bool(parsed.netloc)
 
-def separate_sources(sources: list[str]) -> tuple[list[str], list[str]]:
+def separate_sources(sources: list[str]) -> tuple[list[str], list[Path]]:
 	urls = [s for s in sources if is_url(s)]
 	files_or_dirs = [Path(s) for s in sources if not is_url(s)]
+
 	return urls, files_or_dirs
 
-def main() -> list[str] | str | None:
+def main() -> None:
 	parser = parse_fappy()
 	args = parser.parse_args(sys.argv[1:])
 	urls, files_or_dirs = separate_sources(args.source)
@@ -371,8 +374,7 @@ def main() -> list[str] | str | None:
 		path_name = get_out(txt_path)
 		save_txt(path_name, text_string)
 
-	console = Console()
-	console.print(text_string, markup=False)
+	Console().print(text_string, markup=False)
 
 if __name__  ==  '__main__':
 	main()
