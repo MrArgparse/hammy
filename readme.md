@@ -28,7 +28,7 @@
 
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
-**Usage instructions**
+**Usage instructions:**
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 
