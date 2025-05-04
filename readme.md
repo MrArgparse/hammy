@@ -1,4 +1,4 @@
-**Features:**
+## **Features:**
 
 ---
 
@@ -22,7 +22,7 @@
 
 -An example with 4 items
 
-**Install:**
+## **Install:**
 
 ---
 
@@ -32,7 +32,7 @@
 
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
-**Usage instructions:**
+## **Usage instructions:**
 
 ---
 
