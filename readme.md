@@ -26,6 +26,8 @@
 
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
+-On linux and MacOS, the same file will be in '/home/USERNAME/.config/hammy/hammy_config.toml'
+
 ## **Usage instructions:**
 
 An example with 4 items
