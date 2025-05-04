@@ -1,4 +1,4 @@
-##**Features:**
+**Features:**
 
 ---
 
@@ -24,6 +24,8 @@
 
 **Install:**
 
+---
+
 ``pip install git+https://github.com/MrArgparse/hammy.git``
 
 -Run the tool for the first time by entering ``hammy`` in the terminal
@@ -31,6 +33,8 @@
 -Open config file located in %LOCALAPPDATA%\hammy\hammy_config.json and enter your api_key in the appropriate section.
 
 **Usage instructions:**
+
+---
 
 ``hammy x.jpg /folder x2.jpg https://hamster.is/image.png``
 
