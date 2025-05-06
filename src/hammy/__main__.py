@@ -106,6 +106,18 @@ def load_or_create_config(path: Path | None = None) -> DefaultConfig:
 
 CONFIG = load_or_create_config()
 
+def ensure_directories_exist(config: DefaultConfig) -> None:
+
+	for field in config.__struct_fields__:
+		value = getattr(config, field)
+
+		if isinstance(value, Path):
+
+			if not value.suffix:
+				value.mkdir(parents=True, exist_ok=True)
+
+ensure_directories_exist(CONFIG)
+
 def create_retry() -> requests.Session:
 	retry_strategy = Retry(total=2, status_forcelist=[429, 500, 502, 503, 504], allowed_methods=['HEAD', 'GET', 'OPTIONS'])
 	adapter = HTTPAdapter(max_retries = retry_strategy)
@@ -127,7 +139,7 @@ def find_images(arg: Path) -> list[Path]:
 
 	return sorted(image_files)
 
-def organize_pics(filenames: list[Path], width: int | None = None) -> list[Path]:
+def organize_pics(filenames: list[Path], resize: int | None = None) -> list[Path]:
 	pics = []
 
 	for arg in filenames:
@@ -140,10 +152,11 @@ def organize_pics(filenames: list[Path], width: int | None = None) -> list[Path]
 
 	for index, pic in enumerate(pics):
 
-		if width:
-			resize_pics(pics[index], width)
+		if resize is not None:
+			pics[index] = resize_pics(pics[index], resize)
 
 		while pics[index].stat().st_size > 7600000:
+			logging.warning(f'Image size is too big! Current Size: {pics[index].stat().st_size}')
 			pics[index] = resize_pics(pics[index])
 
 			if pics[index].stat().st_size >= 7600000:
@@ -154,38 +167,42 @@ def organize_pics(filenames: list[Path], width: int | None = None) -> list[Path]
 
 	return pics
 
-def resize_pics(pic: Path, resize_path: Path = CONFIG.resize_path, width: int | None = None) -> Path:
+def check_width(new_width: int, width: int) -> int:
+
+	try:
+
+		new_width = int(input(f'Current width: {width}{os.linesep}Enter new width: '))
+
+		if new_width < 1 or new_width >= width:
+
+			raise ValueError
+
+	except ValueError:
+			logging.error('Invalid input. Enter a valid integer greater than 0 and lower than the current width.')
+	
+	return new_width
+
+
+def resize_pics(pic: Path, resize: int | None = None) -> Path:
 	img: Image.Image = Image.open(pic)
-	img_size = pic.stat().st_size
 	width, height = img.size
 	new_width = 0
 
-	if width:
-		new_width = width
+	if resize is not None:
+		new_width = resize
 
-	while new_width < 300:
-
-		try:
-			new_width = int(input(f'Image size is too big! Current Size: {img_size}{os.linesep}Current width: {width}{os.linesep}Enter new width: '))
-
-			if new_width < 300:
-
-				raise ValueError
-
-		except ValueError:
-			logging.error('Invalid input. Please enter a valid integer greater than 300.')
+	while new_width < 1:
+		new_width = check_width(new_width, width)
 
 	new_height = round(new_width * height / width)
 	img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-	resize_path.mkdir(parents=True, exist_ok=True)
-	fname = resize_path / pic.name
+	fname = CONFIG.resize_path / pic.name
 	img.save(fname)
 
 	return fname
 
 def download_image(url: str) -> Path:
 	r = requests.get(url)
-	CONFIG.download_path.mkdir(parents=True, exist_ok=True)
 	file_name = PurePosixPath(url).name
 	dl_path = CONFIG.download_path / file_name
 
@@ -227,9 +244,9 @@ def save_txt(path_name: Path, text_string: str) -> None:
 	with open(path_name, 'a', encoding='utf-8', newline='\n') as txt_file:
 		txt_file.write(text_string)
 
-def get_out(out: Path) -> Path:
+def get_out() -> Path:
 	date: str = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-	path_name = out / f'links-{date}.txt'
+	path_name = CONFIG.txt_path / f'links-{date}.txt'
 
 	return path_name
 
@@ -284,9 +301,10 @@ def main() -> None:
 	parser = parse_fappy()
 	args = parser.parse_args(sys.argv[1:])
 	urls, files_or_dirs = separate_sources(args.source)
+	resize = args.width if args.width is not None else None
 
 	if files_or_dirs:
-		pics = organize_pics(files_or_dirs)
+		pics = organize_pics(files_or_dirs, resize)
 
 	if urls:
 		downloads = []
@@ -346,10 +364,9 @@ def main() -> None:
 
 		for pic in pics:
 			fname = pic.name
-			width = args.width if args.width else None
 
 			try:
-				link, image_id = upload_image(pic, width)
+				link, image_id = upload_image(pic)
 
 			except (AttributeError, KeyError, requests.exceptions.HTTPError, ValueError) as e:
 				logging.error(f'{type(e).__name__}: {e}')
@@ -372,9 +389,7 @@ def main() -> None:
 		pyperclip.copy(text_string)
 
 	if args.txt:
-		txt_path = CONFIG.txt_path
-		path_name = get_out(txt_path)
-		save_txt(path_name, text_string)
+		save_txt(get_out(), text_string)
 
 	Console().print(text_string, markup=False)
 
