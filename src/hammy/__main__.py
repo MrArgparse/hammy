@@ -127,7 +127,7 @@ def find_images(arg: Path) -> list[Path]:
 
 	return sorted(image_files)
 
-def organize_pics(filenames: list[Path]) -> list[Path]:
+def organize_pics(filenames: list[Path], width: int | None = None) -> list[Path]:
 	pics = []
 
 	for arg in filenames:
@@ -140,6 +140,9 @@ def organize_pics(filenames: list[Path]) -> list[Path]:
 
 	for index, pic in enumerate(pics):
 
+		if width:
+			resize_pics(pics[index], width)
+
 		while pics[index].stat().st_size > 7600000:
 			pics[index] = resize_pics(pics[index])
 
@@ -151,11 +154,14 @@ def organize_pics(filenames: list[Path]) -> list[Path]:
 
 	return pics
 
-def resize_pics(pic: Path, resize_path: Path = CONFIG.resize_path) -> Path:
+def resize_pics(pic: Path, resize_path: Path = CONFIG.resize_path, width: int | None = None) -> Path:
 	img: Image.Image = Image.open(pic)
 	img_size = pic.stat().st_size
 	width, height = img.size
 	new_width = 0
+
+	if width:
+		new_width = width
 
 	while new_width < 300:
 
@@ -188,14 +194,10 @@ def download_image(url: str) -> Path:
 	
 	return dl_path
 
-def upload_image(image_path: Path, width: int | None = None) -> tuple[str, str]:
+def upload_image(image_path: Path) -> tuple[str, str]:
 	url = 'https://hamster.is/api/1/upload'
 	headers = {'X-API-Key': CONFIG.api_key}
 	http = create_retry()
-
-	if width:
-		headers['width'] = str(width)
-
 	fspath = str(image_path)
 
 	with open(fspath, 'rb') as f:
