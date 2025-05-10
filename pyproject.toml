@@ -7,38 +7,38 @@ requires-python = ">=3.10"
 keywords = ["images", "upload", "hamster"]
 
 authors = [
-  {name = "MrArgparse", email = "-@-.org" }
+	{name = "MrArgparse", email = "-@-.org" }
 ]
 
 maintainers = [
-  {name = "MrArgparse", email = "-@-.org" }
+	{name = "MrArgparse", email = "-@-.org" }
 ]
 
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
+	"Development Status :: 5 - Production/Stable",
 
-  "Intended Audience :: Developers",
-  
-  "Topic :: Software Development :: Build Tools",
+	"Intended Audience :: Developers",
+	
+	"Topic :: Software Development :: Build Tools",
 
-  "License :: OSI Approved :: MIT License",
+	"License :: OSI Approved :: MIT License",
 
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3 :: Only",
 ]
 
 dependencies = [
-  "msgspec",
-  "pillow",
-  "platformdirs",
-  "pyperclip",
-  "requests",
-  "rich",
-  "tomlkit",
-  "urllib3",
-  "pyperclip"
+	"msgspec",
+	"pillow",
+	"platformdirs",
+	"pyperclip",
+	"requests",
+	"rich",
+	"tomlkit",
+	"types-pyperclip",
+	"urllib3"
 ]
 
 [project.scripts]
@@ -49,4 +49,8 @@ requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
-"hammy.resize" = ["*.placeholder"]
+"hammy" = ["__main__.pyi", "py.typed"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"

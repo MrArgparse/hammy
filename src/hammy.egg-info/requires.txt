@@ -5,5 +5,5 @@ pyperclip
 requests
 rich
 tomlkit
+types-pyperclip
 urllib3
-pyperclip
