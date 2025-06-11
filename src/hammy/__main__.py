@@ -34,8 +34,6 @@ logging.basicConfig(
 
 class DefaultConfig(msgspec.Struct, kw_only=True):
     api_key: str = ''
-    download_path: Path = CONFIG_FOLDER / 'downloads'
-    resize_path: Path = CONFIG_FOLDER / 'resize'
     txt_path: Path = CONFIG_FOLDER / 'txt'
 
 
