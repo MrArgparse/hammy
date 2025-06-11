@@ -1,3 +1,4 @@
+
 ## **Features:**
 
 -Sends links to clipboard
@@ -35,6 +36,10 @@ An example with 4 items
 Sends links to clipboard
     
 ``--clip``, ``-c``
+
+Save links to a text file (set path in config)
+    
+``--txt``, ``-t``
 
 Output links in bbcode format
     
