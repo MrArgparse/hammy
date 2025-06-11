@@ -1,6 +1,6 @@
 [project]
 name = "hammy"
-version = "0.0.2"
+version = "0.0.3"
 description = "Upload images to hamster"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,6 +30,7 @@ classifiers = [
 ]
 
 dependencies = [
+	"fake_useragent",
 	"msgspec",
 	"pillow",
 	"platformdirs",
@@ -53,4 +54,3 @@ build-backend = "setuptools.build_meta"
 
 [tool.ruff.format]
 quote-style = "single"
-indent-style = "tab"
