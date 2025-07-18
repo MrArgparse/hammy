@@ -22,6 +22,9 @@ import shutil
 import sys
 import tomlkit
 
+#fix single line issue
+#gif resize issue
+
 EXTENSIONS = frozenset(['.bmp', '.gif', '.jpg', '.jpeg', '.png', '.webp'])
 PLATFORMDIRS = platformdirs.PlatformDirs(appname='hammy', appauthor=False)
 CONFIG_FOLDER = PLATFORMDIRS.user_config_path

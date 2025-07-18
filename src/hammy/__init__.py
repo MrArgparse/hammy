@@ -4,6 +4,5 @@ from .__main__ import (
     resize_pics as resize_pics,
     upload_image as upload_image,
     format_links as format_links,
-    get_progress as get_progress,
-    EXTENSIONS as EXTENSIONS,
+    EXTENSIONS as EXTENSIONS
 )
