@@ -322,13 +322,22 @@ def upload_image(image_path: Path | str, resize: int | None = None) -> tuple[str
     headers = {'X-API-Key': CONFIG.api_key}
     http = create_retry()
     basename = os.path.basename(os.fspath(image_path))
-    ext = os.path.splitext("image.webp")[1][1:]
+    ext = os.path.splitext(image_path)[1][1:]
     str_path = os.fspath(image_path)
 
     if is_url(str_path):
         download = download_image(str_path, io.BytesIO())
-        dl_buffer = resize_pics(download, io.BytesIO(), resize) if resize else download
+
+        if resize:
+            if is_animated(download):
+                dl_buffer = resize_animations(download, io.BytesIO(), ext, resize)
+            else:
+                dl_buffer = resize_pics(download, io.BytesIO(), resize)
+        else:
+            dl_buffer = download
+
         unique = make_it_unique(dl_buffer, io.BytesIO())
+
     else:
         with open(image_path, 'rb') as buffer:
 
