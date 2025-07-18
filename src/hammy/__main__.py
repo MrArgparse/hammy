@@ -12,6 +12,7 @@ from urllib.parse import urlparse, urlunparse
 import argparse
 import logging
 import msgspec
+import imagequant
 import io
 import os
 import random
@@ -21,9 +22,6 @@ import pyperclip
 import shutil
 import sys
 import tomlkit
-
-#fix single line issue
-#gif resize issue
 
 EXTENSIONS = frozenset(['.bmp', '.gif', '.jpg', '.jpeg', '.png', '.webp'])
 PLATFORMDIRS = platformdirs.PlatformDirs(appname='hammy', appauthor=False)
@@ -146,7 +144,7 @@ if not CONFIG.api_key:
         sys.exit(1)
 
 
-def get_useragent_header():
+def get_useragent_header() -> dict[str, str]:
     ua = UserAgent()
     return {'User-Agent': ua.chrome}
 
@@ -191,7 +189,7 @@ def find_images(arg: Path) -> list[Path]:
     return sorted(image_files)
 
 
-def organize_pics(filenames: list[str]) -> list[Path | str]:
+def organize_pics(filenames: list[Path | str]) -> list[Path | str]:
     pics: list[Path | str] = []
 
     for arg in filenames:
@@ -222,24 +220,71 @@ def check_width(new_width: int, width: int) -> int:
     return new_width
 
 
-def resize_pics(
-    img_bytes: BinaryIO, resize_output: BinaryIO, resize: int | None = None
-) -> BinaryIO:
-    img: Image.Image = Image.open(img_bytes)
-    width, height = img.size
+def is_animated(img_bytes: BinaryIO) -> bool:
+    with Image.open(img_bytes) as img:
+        return getattr(img, "n_frames", 1) > 1
+
+    
+def get_new_dimensions(width: int, height: int, resize: int | None) -> tuple[int, int]:
     new_width = 0
 
     if resize is not None:
         new_width = resize
 
-    while new_width < 1:
+    while new_width < 1 or new_width >= width:
         new_width = check_width(new_width, width)
 
     new_height = round(new_width * height / width)
-    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    img.save(resize_output, format='JPEG')
-    resize_output.seek(0)
-    return resize_output
+    return new_width, new_height
+
+
+def resize_pics(
+    img_bytes: BinaryIO, resize_output: BinaryIO, resize: int | None = None
+) -> BinaryIO:
+    with Image.open(img_bytes) as img:
+        width, height = img.size
+        new_width, new_height = get_new_dimensions(width, height, resize)
+        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        img.save(resize_output, format='JPEG')
+        resize_output.seek(0)
+        return resize_output
+
+
+def resize_animations(
+    img_bytes: BinaryIO, resize_output: BinaryIO, ext: str, resize: int | None = None
+) -> BinaryIO:
+    with Image.open(img_bytes) as img:
+        width, height = img.size
+        new_width, new_height = get_new_dimensions(width, height, resize)
+        duration = img.info.get("duration", 100)
+        loop = img.info.get("loop", 0)
+
+        frames = []
+        for frame in range(img.n_frames):
+            img.seek(frame)
+            original = img.copy()
+            resized = original.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            quantized = imagequant.quantize_pil_image(
+                resized,
+                dithering_level=1.0,
+                max_colors=256,
+                min_quality=0,
+                max_quality=80
+            )
+            frames.append(quantized)
+
+        frames[0].save(
+            resize_output,
+            format=ext,
+            save_all=True,
+            append_images=frames[1:],
+            loop=loop,
+            duration=duration,
+            disposal=2,
+        )
+
+        resize_output.seek(0)
+        return resize_output
 
 
 def download_image(url: str, output: BinaryIO) -> BinaryIO:
@@ -257,12 +302,16 @@ def make_it_unique(input: BinaryIO, output: BinaryIO) -> BinaryIO:
     return output
 
 
-def check_img_size(buffer: BinaryIO) -> BinaryIO:
-    while len(buffer.getvalue()) > 7600000:
+def get_byte_size(buffer: BinaryIO) -> int:
+    return len(io.BytesIO(buffer.read()).getvalue())
+
+
+def check_img_size(buffer: BinaryIO, ext: str) -> BinaryIO:
+    while get_byte_size(buffer) > 7600000:
         logging.warning(
-            f'Image size is too big! Current Size: {len(buffer.getvalue())}'
+            f'Image size is too big! Current Size: {get_byte_size(buffer)}'
         )
-        buffer = resize_pics(buffer, io.BytesIO())
+        buffer = resize_animations(buffer, io.BytesIO(), ext) if is_animated(buffer) else resize_pics(buffer, io.BytesIO())
 
     buffer.seek(0)
     return buffer
@@ -273,16 +322,27 @@ def upload_image(image_path: Path | str, resize: int | None = None) -> tuple[str
     headers = {'X-API-Key': CONFIG.api_key}
     http = create_retry()
     basename = os.path.basename(os.fspath(image_path))
+    ext = os.path.splitext("image.webp")[1][1:]
+    str_path = os.fspath(image_path)
 
-    if is_url(os.fspath(image_path)):
-        download = download_image(image_path, io.BytesIO())
-        buffer = resize_pics(download, io.BytesIO(), resize) if resize else download
+    if is_url(str_path):
+        download = download_image(str_path, io.BytesIO())
+        dl_buffer = resize_pics(download, io.BytesIO(), resize) if resize else download
+        unique = make_it_unique(dl_buffer, io.BytesIO())
     else:
-        with open(image_path, 'rb') as f:
-            buffer = resize_pics(f, io.BytesIO(), resize) if resize else f
-            unique = make_it_unique(buffer, io.BytesIO())
+        with open(image_path, 'rb') as buffer:
 
-    final = check_img_size(unique)
+            if resize:
+                if is_animated(buffer):
+                    processed_buffer = resize_animations(buffer, io.BytesIO(), ext, resize)
+                else:
+                    processed_buffer = resize_pics(buffer, io.BytesIO(), resize)
+            else:
+                processed_buffer = buffer
+
+            unique = make_it_unique(processed_buffer, io.BytesIO())
+
+    final = check_img_size(unique, ext)
     file = {'source': (basename, final)}
     response = http.post(url, headers=headers, files=file)
 
@@ -387,6 +447,7 @@ def main() -> None:
         output_path = get_out()
 
     for idx, pic in enumerate(pics):
+        final_link = ''
 
         try:
             link, image_id = upload_image(pic, resize)
@@ -400,7 +461,7 @@ def main() -> None:
         final_link = format_links(args.format, link, image_id)
         Console().print(final_link, markup=False)
 
-        if idx < len(pics) - 1:
+        if idx < len(pics) - 1 and not args.single:
             final_link = final_link + '\n'
 
         if args.clip:

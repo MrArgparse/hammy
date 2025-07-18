@@ -1,7 +1,7 @@
 import argparse
 import msgspec
 import requests
-from _typeshed import Incomplete
+from _typeshed import Incomplete as Incomplete
 from pathlib import Path
 from typing import BinaryIO
 
@@ -25,7 +25,7 @@ def load_or_create_config(path: Path | None = None) -> DefaultConfig: ...
 
 CONFIG: Incomplete
 
-def get_useragent_header(): ...
+def get_useragent_header() -> None: ...
 
 USER_AGENT_HEADER: Incomplete
 
